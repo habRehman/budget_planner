@@ -21,6 +21,8 @@ import {
   Sparkles,
   Receipt,
   Settings as SettingsIcon,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -51,6 +53,8 @@ interface DashboardProps {
   onOpenAddExpense: () => void;
   onOpenSettings: () => void;
   onSaveBudget: (month: string, amount: number, rule: BudgetRule) => Promise<unknown>;
+  theme?: 'light' | 'dark';
+  onToggleTheme?: () => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -71,6 +75,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenAddExpense,
   onOpenSettings,
   onSaveBudget,
+  theme = 'light',
+  onToggleTheme,
 }) => {
   const today = getTodayDate();
   const isSelectedDateToday = selectedDate === today;
@@ -115,14 +121,27 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <span className="app-subtitle">PKR Offline Planner</span>
             </div>
           </div>
-          <button
-            type="button"
-            className="icon-button"
-            onClick={onOpenSettings}
-            aria-label="Settings"
-          >
-            <SettingsIcon size={20} />
-          </button>
+          <div className="app-header-actions">
+            {onToggleTheme && (
+              <button
+                type="button"
+                className="icon-button"
+                onClick={onToggleTheme}
+                aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+                title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+              >
+                {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
+              </button>
+            )}
+            <button
+              type="button"
+              className="icon-button"
+              onClick={onOpenSettings}
+              aria-label="Settings"
+            >
+              <SettingsIcon size={20} />
+            </button>
+          </div>
         </header>
 
         {/* Month Selector */}
@@ -253,14 +272,27 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <span className="app-subtitle">{formatMonthLabel(selectedMonth)}</span>
           </div>
         </div>
-        <button
-          type="button"
-          className="icon-button"
-          onClick={onOpenSettings}
-          aria-label="Settings"
-        >
-          <SettingsIcon size={20} />
-        </button>
+        <div className="app-header-actions">
+          {onToggleTheme && (
+            <button
+              type="button"
+              className="icon-button"
+              onClick={onToggleTheme}
+              aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+              title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            >
+              {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
+            </button>
+          )}
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onOpenSettings}
+            aria-label="Settings"
+          >
+            <SettingsIcon size={20} />
+          </button>
+        </div>
       </header>
 
       {/* Date Navigation Bar ("‹ date ›" plus a "Today" button) */}

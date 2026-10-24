@@ -4,12 +4,22 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/icons/icon-192.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0b132b" />
+    <meta name="theme-color" content="#f8fafc" id="theme-color-meta" />
     <meta name="description" content="Offline-first daily budget planner in Pakistani Rupees" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Daily Budget" />
     <title>Daily Budget</title>
+    <script>
+      (function() {
+        var savedTheme = localStorage.getItem('budget_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        var meta = document.getElementById('theme-color-meta');
+        if (meta) {
+          meta.setAttribute('content', savedTheme === 'dark' ? '#0b132b' : '#f8fafc');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

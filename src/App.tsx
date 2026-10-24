@@ -26,6 +26,22 @@ export default function App() {
   // Toast state
   const [toast, setToast] = useState<ToastMessage | null>(null);
 
+  // Theme state (default to light)
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    return (localStorage.getItem('budget_theme') as 'light' | 'dark') || 'light';
+  });
+
+  const toggleTheme = () => {
+    const next = theme === 'light' ? 'dark' : 'light';
+    setTheme(next);
+    localStorage.setItem('budget_theme', next);
+    document.documentElement.setAttribute('data-theme', next);
+    const meta = document.getElementById('theme-color-meta');
+    if (meta) {
+      meta.setAttribute('content', next === 'dark' ? '#0b132b' : '#f8fafc');
+    }
+  };
+
   const triggerToast = (type: 'success' | 'error' | 'info', text: string) => {
     setToast({
       id: `toast-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
@@ -153,6 +169,8 @@ export default function App() {
             onOpenAddExpense={handleOpenAddExpense}
             onOpenSettings={() => setActiveTab('settings')}
             onSaveBudget={data.saveBudget}
+            theme={theme}
+            onToggleTheme={toggleTheme}
           />
         ) : activeTab === 'history' ? (
           <History
@@ -176,6 +194,8 @@ export default function App() {
             onResetAllData={data.resetAllData}
             onTriggerToast={triggerToast}
             onRequestPersistence={repository.requestPersistentStorage.bind(repository)}
+            theme={theme}
+            onToggleTheme={toggleTheme}
           />
         )}
       </main>

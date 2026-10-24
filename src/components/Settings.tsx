@@ -18,6 +18,8 @@ import {
   AlertTriangle,
   FileSpreadsheet,
   Check,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
 interface SettingsProps {
@@ -32,6 +34,8 @@ interface SettingsProps {
   onResetAllData: () => Promise<void>;
   onTriggerToast: (type: 'success' | 'error' | 'info', message: string) => void;
   onRequestPersistence: () => Promise<boolean>;
+  theme?: 'light' | 'dark';
+  onToggleTheme?: () => void;
 }
 
 export const Settings: React.FC<SettingsProps> = ({
@@ -46,6 +50,8 @@ export const Settings: React.FC<SettingsProps> = ({
   onResetAllData,
   onTriggerToast,
   onRequestPersistence,
+  theme = 'light',
+  onToggleTheme,
 }) => {
   // Budget edit state
   const [budgetAmountInput, setBudgetAmountInput] = useState(
@@ -176,6 +182,36 @@ export const Settings: React.FC<SettingsProps> = ({
         <h2 className="settings-title">App Settings & Data</h2>
         <p className="settings-desc">Manage your monthly budget, data backups, and offline storage.</p>
       </div>
+
+      {/* Theme & Appearance */}
+      {onToggleTheme && (
+        <section className="card settings-section">
+          <h3 className="section-title">Theme & Appearance</h3>
+          <p className="section-desc">Choose between crisp light theme and dark navy theme.</p>
+          <div className="toggle-tab-group" style={{ marginTop: '0.75rem', marginBottom: '0.25rem' }}>
+            <button
+              type="button"
+              className={`toggle-tab ${theme === 'light' ? 'active' : ''}`}
+              onClick={() => {
+                if (theme !== 'light') onToggleTheme();
+              }}
+            >
+              <Sun size={16} />
+              <span>Light Mode</span>
+            </button>
+            <button
+              type="button"
+              className={`toggle-tab ${theme === 'dark' ? 'active' : ''}`}
+              onClick={() => {
+                if (theme !== 'dark') onToggleTheme();
+              }}
+            >
+              <Moon size={16} />
+              <span>Dark Mode</span>
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* 1. Monthly Budget Configuration */}
       <section className="card settings-section">
