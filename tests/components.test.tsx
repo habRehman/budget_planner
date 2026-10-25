@@ -4,6 +4,7 @@ import { Dashboard } from '../src/components/Dashboard';
 import { ExpenseSheet } from '../src/components/ExpenseSheet';
 import { DayView } from '../src/components/DayView';
 import { MonthProgress } from '../src/components/MonthProgress';
+import { CalculatorModal } from '../src/components/CalculatorModal';
 import { MonthlyBudget, DayBudget, Expense } from '../src/domain/types';
 
 describe('UI Components (React Testing Library)', () => {
@@ -222,5 +223,92 @@ describe('UI Components (React Testing Library)', () => {
     await waitFor(() => {
       expect(handleDelete).toHaveBeenCalledWith('exp-1');
     });
+  });
+
+  it('ExpenseSheet displays already applied entries on the same day', () => {
+    const existing: Expense[] = [
+      {
+        id: 'exp-prev-1',
+        date: '2026-10-23',
+        amount: 35000, // Rs 350
+        description: 'Morning Chai & Paratha',
+        category: 'Food & Groceries',
+        createdAt: '2026-10-23T08:00:00.000Z',
+        updatedAt: '2026-10-23T08:00:00.000Z',
+      },
+      {
+        id: 'exp-prev-2',
+        date: '2026-10-23',
+        amount: 150000, // Rs 1,500
+        description: 'Fuel Refill',
+        category: 'Transport',
+        createdAt: '2026-10-23T09:00:00.000Z',
+        updatedAt: '2026-10-23T09:00:00.000Z',
+      },
+    ];
+
+    render(
+      <ExpenseSheet
+        isOpen={true}
+        initialDate="2026-10-23"
+        existingExpenses={existing}
+        onClose={vi.fn()}
+        onSaveSingle={vi.fn()}
+        onSaveMultiple={vi.fn()}
+      />
+    );
+
+    // Header displaying already applied entries
+    expect(screen.getByText(/Already Applied on.*23 Oct/i)).toBeInTheDocument();
+    // Total summary: 2 entries • Rs 1,850.00
+    expect(screen.getByText(/2 entries • Rs 1,850.00/i)).toBeInTheDocument();
+    // Individual item names and amounts
+    expect(screen.getByText('Morning Chai & Paratha')).toBeInTheDocument();
+    expect(screen.getByText('Rs 350.00')).toBeInTheDocument();
+    expect(screen.getByText('Fuel Refill')).toBeInTheDocument();
+    expect(screen.getByText('Rs 1,500.00')).toBeInTheDocument();
+  });
+
+  it('CalculatorModal provides interactive dial pad with live math preview and apply action', () => {
+    const handleApply = vi.fn();
+    const handleClose = vi.fn();
+
+    render(
+      <CalculatorModal
+        isOpen={true}
+        title="Adjust Monthly Budget"
+        initialValue="30000"
+        onClose={handleClose}
+        onApply={handleApply}
+      />
+    );
+
+    // Initial value loaded
+    expect(screen.getByText('30000')).toBeInTheDocument();
+
+    // Tap +
+    const plusBtn = screen.getByRole('button', { name: /^Plus$/i });
+    fireEvent.click(plusBtn);
+
+    // Tap 1
+    const oneBtn = screen.getByRole('button', { name: /^1$/i });
+    fireEvent.click(oneBtn);
+
+    // Tap 5
+    const fiveBtn = screen.getByRole('button', { name: /^5$/i });
+    fireEvent.click(fiveBtn);
+
+    // Tap 000 via quick preset +10,000
+    const preset10k = screen.getByRole('button', { name: /^\+10,000$/i });
+    fireEvent.click(preset10k);
+
+    // Tap apply
+    const applyBtn = screen.getByRole('button', { name: /Apply budget amount/i });
+    fireEvent.click(applyBtn);
+
+    expect(handleApply).toHaveBeenCalledTimes(1);
+    // 30000 + 15 + 10000 = 40015
+    expect(handleApply).toHaveBeenCalledWith(40015);
+    expect(handleClose).toHaveBeenCalledTimes(1);
   });
 });

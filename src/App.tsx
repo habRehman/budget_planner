@@ -215,6 +215,7 @@ export default function App() {
         isOpen={isExpenseSheetOpen}
         initialDate={activeDayViewDate ?? data.selectedDate}
         editingExpense={editingExpense}
+        existingExpenses={data.monthExpenses}
         onClose={() => {
           setIsExpenseSheetOpen(false);
           setEditingExpense(null);

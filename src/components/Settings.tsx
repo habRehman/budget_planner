@@ -20,7 +20,9 @@ import {
   Check,
   Sun,
   Moon,
+  Calculator,
 } from 'lucide-react';
+import { CalculatorModal } from './CalculatorModal';
 
 interface SettingsProps {
   currentMonth: string;
@@ -59,6 +61,7 @@ export const Settings: React.FC<SettingsProps> = ({
   );
   const [budgetRule, setBudgetRule] = useState<BudgetRule>(currentBudget?.rule ?? 'flex');
   const [isSavingBudget, setIsSavingBudget] = useState(false);
+  const [isCalcModalOpen, setIsCalcModalOpen] = useState(false);
 
   // Import state
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -222,9 +225,21 @@ export const Settings: React.FC<SettingsProps> = ({
 
         <form onSubmit={handleUpdateBudget} className="settings-form">
           <div className="form-group">
-            <label htmlFor="settings-budget-amount" className="form-label">
-              Monthly Budget (Rupees)
-            </label>
+            <div className="label-with-action">
+              <label htmlFor="settings-budget-amount" className="form-label">
+                Monthly Budget (Rupees)
+              </label>
+              <button
+                type="button"
+                className="btn btn-secondary btn-xs calc-launch-btn"
+                onClick={() => setIsCalcModalOpen(true)}
+                aria-label="Open Calculator Dial Pad"
+                title="Open Calculator Dial Pad"
+              >
+                <Calculator size={13} className="text-accent" />
+                <span>Calculator Dial Pad</span>
+              </button>
+            </div>
             <div className="input-prefix-wrapper">
               <span className="input-prefix">Rs</span>
               <input
@@ -235,9 +250,22 @@ export const Settings: React.FC<SettingsProps> = ({
                 placeholder="e.g. 50,000"
                 value={budgetAmountInput}
                 onChange={(e) => setBudgetAmountInput(e.target.value)}
+                onClick={() => setIsCalcModalOpen(true)}
                 required
               />
+              <button
+                type="button"
+                className="input-suffix-calc-btn"
+                onClick={() => setIsCalcModalOpen(true)}
+                aria-label="Open Calculator Dial Pad"
+                title="Calculate budget with dial pad"
+              >
+                <Calculator size={18} />
+              </button>
             </div>
+            <span className="form-hint">
+              Tap input or calculator icon to open the calculation dial pad.
+            </span>
           </div>
 
           <div className="form-group">
@@ -498,6 +526,18 @@ export const Settings: React.FC<SettingsProps> = ({
           </div>
         </div>
       )}
+
+      {/* Calculator Dial Pad Modal */}
+      <CalculatorModal
+        isOpen={isCalcModalOpen}
+        title={`Budget Calculator`}
+        initialValue={budgetAmountInput}
+        monthLabel={formatMonthLabel(currentMonth)}
+        onClose={() => setIsCalcModalOpen(false)}
+        onApply={(amountInRupees) => {
+          setBudgetAmountInput(amountInRupees.toLocaleString('en-US'));
+        }}
+      />
     </div>
   );
 };

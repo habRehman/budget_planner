@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, CheckCircle2, TrendingUp, Calendar } from 'lucide-react';
+import { AlertCircle, CheckCircle2, TrendingUp, Calendar, Calculator } from 'lucide-react';
 import { formatRs } from '../domain/money';
 
 interface MonthProgressProps {
@@ -12,6 +12,7 @@ interface MonthProgressProps {
   daysElapsed: number;
   daysInMonth: number;
   monthLabel: string;
+  onAdjustBudget?: () => void;
 }
 
 export const MonthProgress: React.FC<MonthProgressProps> = ({
@@ -24,6 +25,7 @@ export const MonthProgress: React.FC<MonthProgressProps> = ({
   daysElapsed,
   daysInMonth,
   monthLabel,
+  onAdjustBudget,
 }) => {
   const isOverBudget = monthOverspend > 0;
   const percentage = budgetAmount > 0 ? Math.min(100, Math.round((totalSpent / budgetAmount) * 100)) : 0;
@@ -63,7 +65,21 @@ export const MonthProgress: React.FC<MonthProgressProps> = ({
 
       <div className="progress-meta-row">
         <span>{percentage}% spent</span>
-        <span>Budget: {formatRs(budgetAmount)}</span>
+        <div className="budget-label-with-adjust">
+          <span>Budget: {formatRs(budgetAmount)}</span>
+          {onAdjustBudget && (
+            <button
+              type="button"
+              className="btn btn-secondary btn-xs adjust-budget-btn"
+              onClick={onAdjustBudget}
+              aria-label="Adjust Monthly Budget with Calculator Dial Pad"
+              title="Adjust budget"
+            >
+              <Calculator size={12} className="text-accent" />
+              <span>Adjust</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Financial Details Grid */}

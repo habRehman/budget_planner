@@ -23,7 +23,9 @@ import {
   Settings as SettingsIcon,
   Sun,
   Moon,
+  Calculator,
 } from 'lucide-react';
+import { CalculatorModal } from './CalculatorModal';
 
 interface DashboardProps {
   selectedDate: string;
@@ -86,6 +88,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [setupRule, setSetupRule] = useState<BudgetRule>('flex');
   const [setupError, setSetupError] = useState<string | null>(null);
   const [isSettingUp, setIsSettingUp] = useState(false);
+  const [isCalcOpen, setIsCalcOpen] = useState(false);
 
   const handleSetupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,9 +189,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           <form onSubmit={handleSetupSubmit} className="setup-form">
             <div className="form-group">
-              <label htmlFor="budget-input" className="form-label">
-                Monthly Budget (PKR)
-              </label>
+              <div className="label-with-action">
+                <label htmlFor="budget-input" className="form-label">
+                  Monthly Budget (PKR)
+                </label>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-xs calc-launch-btn"
+                  onClick={() => setIsCalcOpen(true)}
+                  aria-label="Open Calculator Dial Pad"
+                  title="Open Calculator Dial Pad"
+                >
+                  <Calculator size={13} className="text-accent" />
+                  <span>Calculator Dial Pad</span>
+                </button>
+              </div>
               <div className="input-prefix-wrapper">
                 <span className="input-prefix">Rs</span>
                 <input
@@ -199,10 +214,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   className="form-input text-lg font-bold"
                   value={setupAmount}
                   onChange={(e) => setSetupAmount(e.target.value)}
+                  onClick={() => setIsCalcOpen(true)}
                   required
                   autoFocus
                 />
+                <button
+                  type="button"
+                  className="input-suffix-calc-btn"
+                  onClick={() => setIsCalcOpen(true)}
+                  aria-label="Open Calculator Dial Pad"
+                  title="Calculate budget with dial pad"
+                >
+                  <Calculator size={18} />
+                </button>
               </div>
+              <span className="form-hint">
+                Tap input or calculator icon to open the calculation dial pad.
+              </span>
             </div>
 
             <div className="form-group">
@@ -251,6 +279,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </button>
           </form>
         </div>
+
+        <CalculatorModal
+          isOpen={isCalcOpen}
+          title="Calculate Monthly Budget"
+          initialValue={setupAmount}
+          monthLabel={formatMonthLabel(selectedMonth)}
+          onClose={() => setIsCalcOpen(false)}
+          onApply={(amount) => {
+            setSetupAmount(amount.toLocaleString('en-US'));
+          }}
+        />
       </div>
     );
   }
@@ -429,6 +468,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             daysElapsed={monthSummary.daysElapsed}
             daysInMonth={monthSummary.daysInMonth}
             monthLabel={formatMonthLabel(selectedMonth)}
+            onAdjustBudget={() => setIsCalcOpen(true)}
           />
         </section>
       )}
@@ -444,6 +484,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <span>Record Expense</span>
         </button>
       </div>
+
+      {/* Calculator Dial Pad Modal for Adjusting Active Budget */}
+      {budget && (
+        <CalculatorModal
+          isOpen={isCalcOpen}
+          title="Adjust Monthly Budget"
+          initialValue={budget.amount / 100}
+          monthLabel={formatMonthLabel(selectedMonth)}
+          onClose={() => setIsCalcOpen(false)}
+          onApply={async (newAmount) => {
+            const paisa = Math.round(newAmount * 100);
+            await onSaveBudget(selectedMonth, paisa, budget.rule);
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Expense } from '../domain/types';
 import { ALLOWED_CATEGORIES, validateExpenseInput } from '../domain/validation';
 import { parseRupees, formatRs } from '../domain/money';
-import { X, Plus, Trash2, Check, AlertCircle } from 'lucide-react';
+import { formatDisplayDate } from '../domain/dates';
+import { X, Plus, Trash2, Check, AlertCircle, Receipt } from 'lucide-react';
 
 interface ExpenseSheetProps {
   isOpen: boolean;
   initialDate: string;
   editingExpense?: Expense | null;
+  existingExpenses?: Expense[];
   onClose: () => void;
   onSaveSingle: (data: {
     id?: string;
@@ -32,6 +34,7 @@ export const ExpenseSheet: React.FC<ExpenseSheetProps> = ({
   isOpen,
   initialDate,
   editingExpense,
+  existingExpenses = [],
   onClose,
   onSaveSingle,
   onSaveMultiple,
@@ -181,6 +184,50 @@ export const ExpenseSheet: React.FC<ExpenseSheetProps> = ({
     }
   };
 
+  const activeDate = mode === 'single' ? singleDate : multipleDate;
+  const sameDayExpenses = (existingExpenses || []).filter(
+    (e) => e.date === activeDate && (!editingExpense || e.id !== editingExpense.id)
+  );
+  const sameDayTotalPaisa = sameDayExpenses.reduce((sum, e) => sum + e.amount, 0);
+
+  const renderSameDayEntries = () => (
+    <div className="sameday-entries-container" aria-label={`Recorded expenses for ${formatDisplayDate(activeDate)}`}>
+      <div className="sameday-entries-header">
+        <div className="sameday-header-title">
+          <Receipt size={15} className="text-accent" />
+          <span>Already Applied on {formatDisplayDate(activeDate)}</span>
+        </div>
+        <span className={`badge ${sameDayExpenses.length > 0 ? 'badge-neutral' : 'badge-subtle'}`}>
+          {sameDayExpenses.length} {sameDayExpenses.length === 1 ? 'entry' : 'entries'} • {formatRs(sameDayTotalPaisa)}
+        </span>
+      </div>
+
+      {sameDayExpenses.length > 0 ? (
+        <div className="sameday-entries-list">
+          {sameDayExpenses.map((item) => (
+            <div key={item.id} className="sameday-entry-row">
+              <div className="sameday-entry-details">
+                <span className="sameday-entry-name">
+                  {item.description?.trim() ? item.description : 'Expense'}
+                </span>
+                {item.category && (
+                  <span className="badge badge-info sameday-badge-sm">{item.category}</span>
+                )}
+              </div>
+              <span className="sameday-entry-price font-bold">
+                {formatRs(item.amount)}
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="sameday-empty-hint">
+          No other expenses applied yet on this date.
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="bottom-sheet-backdrop" onClick={onClose} role="presentation">
       <div
@@ -280,6 +327,9 @@ export const ExpenseSheet: React.FC<ExpenseSheetProps> = ({
                 />
               </div>
 
+              {/* Already applied entries for this day */}
+              {renderSameDayEntries()}
+
               <div className="form-group">
                 <label htmlFor="expense-category" className="form-label">
                   Category (optional)
@@ -329,6 +379,9 @@ export const ExpenseSheet: React.FC<ExpenseSheetProps> = ({
                   required
                 />
               </div>
+
+              {/* Already applied entries for this day */}
+              {renderSameDayEntries()}
 
               <div className="running-total-card">
                 <span className="running-total-label">Running Total</span>

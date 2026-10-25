@@ -18,6 +18,27 @@
         if (meta) {
           meta.setAttribute('content', savedTheme === 'dark' ? '#0b132b' : '#f8fafc');
         }
+
+        // Defensive prune: remove any lingering or injected Netlify badge or drawer
+        function pruneNetlify() {
+          var els = document.querySelectorAll('iframe[src*="netlify"], #netlify-badge, #netlify-drawer, .netlify-badge, [data-netlify-badge]');
+          for (var i = 0; i < els.length; i++) {
+            if (els[i] && els[i].parentNode) {
+              els[i].parentNode.removeChild(els[i]);
+            }
+          }
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', pruneNetlify);
+        } else {
+          pruneNetlify();
+        }
+        if (window.MutationObserver) {
+          var obs = new MutationObserver(function() {
+            pruneNetlify();
+          });
+          obs.observe(document.documentElement, { childList: true, subtree: true });
+        }
       })();
     </script>
   </head>
